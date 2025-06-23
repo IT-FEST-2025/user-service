@@ -8,4 +8,9 @@ router.post("/register", async (req, res) => {
   res.json(response);
 });
 
+router.post("/login", async (req, res) => {
+  let response = await AuthService.loginExistingUser(req);
+  res.json(response);
+});
+
 export { router };

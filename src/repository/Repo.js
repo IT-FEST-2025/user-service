@@ -23,7 +23,6 @@ async function addUser(newUser) {
 
   try {
     const result = await dbPool.query(sqlString, values);
-    console.log(result.rows);
     return result.rows[0];
   } catch (err) {
     console.error("Gagal insert user:", err.message);
@@ -32,4 +31,28 @@ async function addUser(newUser) {
   }
 }
 
-export { addUser };
+async function getSimpleData(StringUsername) {
+  //dipake buat login
+  const sqlQuery = `
+  SELECT
+    id,
+    email,
+    password_hash,
+    full_name,
+    username,
+    created_at
+  FROM users
+  WHERE username = $1
+`;
+
+  const values = [StringUsername];
+  try {
+    const result = await dbPool.query(sqlQuery, values);
+    return result.rows[0];
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export { addUser, getSimpleData };
