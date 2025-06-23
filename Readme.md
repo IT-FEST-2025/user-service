@@ -14,11 +14,7 @@ endpoint dari service api, response dari api dan juga struktur repo nya.
   "email": "user@email.com",
   "password": "userpassword",
   "username": "accountName",
-  "fullName": "fullname",
-  "age": 17,
-  "height": 160,
-  "wheight": 60,
-  "created_at": "timestamp"
+  "fullName": "fullname"
 }
 ```
 
@@ -26,11 +22,11 @@ endpoint dari service api, response dari api dan juga struktur repo nya.
 
 ```json
 {
-  "status" : "success"
-  "message" : "akun berhasil dibuat! silahkan login"
-  "data" : {
-    "username" : "username",
-    "created_at" :"timestamp"
+  "status": "success",
+  "message": "akun berhasil dibuat! silahkan login",
+  "data": {
+    "username": "username",
+    "created_at": "timestamp"
   }
 }
 ```
@@ -90,3 +86,19 @@ endpoint dari service api, response dari api dan juga struktur repo nya.
 ## FORGOT PASSWORD
 
 ## HEALT-TRACKING
+
+## USER SCHEMA
+
+Schema user untuk data awal yang bakal diminta
+
+```sql
+CREATE TABLE USERS(
+    id serial primary key,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    age INTEGER,
+    gender VARCHAR(10) CHECK (gender IN ('pria', 'wanita', 'lainnya')),
+    height INTEGER,
+    weight DECIMAL(5,2));
+```
