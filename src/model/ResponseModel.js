@@ -1,16 +1,18 @@
 class SuccessResponse {
-  constructor({ status, message, data }) {
+  constructor({ status, message, data, statusCode }) {
     this.status = status;
     this.message = message;
     this.data = data;
+    this.statusCode = statusCode;
   }
 }
 
 class ErrorResponse {
-  constructor(status, message, errors) {
+  constructor({ status, message, error, statusCode }) {
     this.status = status;
     this.message = message;
-    this.errors = errors;
+    this.error = error;
+    this.statusCode = statusCode;
   }
 }
 

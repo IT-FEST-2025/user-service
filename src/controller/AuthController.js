@@ -5,12 +5,12 @@ const router = express.Router();
 
 router.post("/register", async (req, res) => {
   let response = await AuthService.registerNewUser(req);
-  res.json(response);
+  res.status(Number(response.statusCode)).json(response);
 });
 
 router.post("/login", async (req, res) => {
   let response = await AuthService.loginExistingUser(req);
-  res.json(response);
+  res.status(Number(response.statusCode)).json(response);
 });
 
 export { router };

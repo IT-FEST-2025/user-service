@@ -6,6 +6,12 @@ import {
   userRegisterSchema,
   userLoginSchema,
 } from "../model/ValidationModel.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+
+//global var
+const jwtSecret = process.env.JWT_SECRET;
 
 function validateUser(userObject) {
   const { error } = userRegisterSchema.validate(userObject, {
@@ -37,6 +43,7 @@ async function registerNewUser(req) {
       status: "bad request",
       message: "data tidak valid",
       error: errorDetails,
+      stausCode: 400,
     });
   }
 
@@ -55,12 +62,14 @@ async function registerNewUser(req) {
       status: "success",
       message: "berhasil registrasi! harap login",
       data: resData,
+      statusCode: 200,
     });
   } catch (error) {
     return new ErrorResponse({
       status: "error",
       message: "terjadi kesalahan saat registrasi",
       error: [error.detail, error.constraint],
+      statusCode: 400,
     });
   }
 }
@@ -79,16 +88,19 @@ async function loginExistingUser(loginObjectBody) {
       status: "bad request",
       message: "data tidak valid",
       error: errorDetails,
+      stausCode: 400,
     });
   }
 
   const userData = await Repo.getSimpleData(username);
+  // console.log(userData);
 
   if (!userData) {
     return new ErrorResponse({
       status: "bad request",
       message: "akun tidak ditemukan!",
       error: null,
+      statusCode: 400,
     });
   }
 
@@ -99,15 +111,29 @@ async function loginExistingUser(loginObjectBody) {
       status: "bad request",
       message: "password salah",
       error: null,
+      statusCode: 401,
     });
   }
+
+  const token = jwt.sign(
+    {
+      id: userData.id,
+      username: userData.username,
+      timeStamp: Date.now(),
+    },
+    jwtSecret,
+    {
+      expiresIn: "72h",
+    }
+  );
 
   return new SuccessResponse({
     status: "success",
     message: "berhasil login",
     data: {
-      accessToken: "ini rahasia",
+      accessToken: token,
     },
+    statusCode: 200,
   });
 }
 
