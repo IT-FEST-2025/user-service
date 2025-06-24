@@ -9,6 +9,8 @@ import {
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
+import { transporter } from "../model/EmailTransporterModel.js";
+import crypto from "crypto";
 
 //global var
 const jwtSecret = process.env.JWT_SECRET;
@@ -137,4 +139,146 @@ async function loginExistingUser(loginObjectBody) {
   });
 }
 
-export { registerNewUser, loginExistingUser };
+async function forgotPassword(req) {
+  const { username } = req.body;
+
+  const userData = await Repo.getSimpleData(username);
+  console.log(userData);
+
+  if (!userData) {
+    return new ErrorResponse({
+      status: "NOT FOUND",
+      message: "username tidak ditemukan",
+      error: null,
+      statusCode: 404,
+    });
+  }
+
+  const userEmail = userData.email;
+  const resetPwToken = Math.floor(100000 + Math.random() * 900000).toString();
+  const expDate = new Date(Date.now() + 15 * 60 * 1000);
+
+  try {
+    await Repo.setResetToken(userEmail, resetPwToken, expDate);
+
+    const mailOptions = {
+      from: "agmerramadhan@gmail.com",
+      to: userEmail,
+      subject: "reset code password diagnify",
+      text: `BERIKUT ADALAH KODE UNTUK RESET PASSWORD AKUN DIAGNIFY MU ${resetPwToken}`,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email: ", error);
+      } else {
+        console.log("Email sent: ", info.response);
+      }
+    });
+
+    return new SuccessResponse({
+      status: "success",
+      message: "kode sudah dikirimkan ke email",
+      data: {
+        email: userEmail,
+      },
+      statusCode: 200,
+    });
+  } catch (error) {
+    return new ErrorResponse({
+      status: "error",
+      message: "terjadi kesalahan internal di server",
+      error: [error.detail],
+      statusCode: 500,
+    });
+  }
+}
+
+async function verifyResetToken(req) {
+  const { email, resetCode } = req.body;
+
+  let isResetCodeValid = null;
+
+  try {
+    isResetCodeValid = await Repo.findValidResetToken(resetCode, email);
+  } catch (error) {
+    return new ErrorResponse({
+      status: "error",
+      message: "terjadai kesalahan di server!",
+      error: null,
+      statusCode: 500,
+    });
+  }
+
+  if (!isResetCodeValid) {
+    return new ErrorResponse({
+      status: "error",
+      message: "Kode sudah expire atau tidak ditemukan!",
+      error: null,
+      statusCode: 400,
+    });
+  }
+
+  const tempCode = crypto.randomBytes(16).toString("hex");
+  console.log(isResetCodeValid);
+
+  try {
+    await Repo.setTempTokenPw(tempCode, email);
+    return new SuccessResponse({
+      status: "success",
+      message: "berhasil memverifikasi kode reset token",
+      data: {
+        tempToken: tempCode,
+      },
+      statusCode: 200,
+    });
+  } catch (error) {
+    return new ErrorResponse({
+      status: "error",
+      message: "terjadai kesalahan di server!",
+      error: [error.details],
+      statusCode: 500,
+    });
+  }
+}
+
+async function updatePassword(req) {
+  const { tempToken, newPassword } = req.body;
+
+  const hashedPw = await bcrypt.hash(newPassword, 10);
+
+  if (!tempToken || !newPassword) {
+    return new ErrorResponse({
+      status: "BAD REQUEST",
+      message:
+        "Token atau password baru tidak valid! harap masukan data secara benar!",
+      error: null,
+      statusCode: 400,
+    });
+  }
+
+  try {
+    await Repo.updatePassword(tempToken, hashedPw);
+    return new SuccessResponse({
+      status: "success",
+      message: "mengupdate password",
+      data: null,
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.log(error);
+    return new ErrorResponse({
+      status: "error",
+      message: "terjadi kesalahan saat mengganti password! operasi dibatalkan",
+      error: [error],
+      statusCode: 500,
+    });
+  }
+}
+
+export {
+  registerNewUser,
+  loginExistingUser,
+  forgotPassword,
+  verifyResetToken,
+  updatePassword,
+};

@@ -85,6 +85,33 @@ endpoint dari service api, response dari api dan juga struktur repo nya.
 
 ## FORGOT PASSWORD
 
+Alur/flow untuk forgot password :
+
+1. User input username di FE → POST ke BE :
+
+   **endpoint** : POST /api/forgot-password :
+
+req body
+
+```json
+{
+  "username": "username"
+}
+```
+
+response body Success :
+
+```json
+
+```
+
+---
+
+2. BE generate kode 6 digit → simpan di DB → kirim email
+3. User input kode di FE → POST ke BE untuk validasi
+4. Kalau valid → FE redirect ke form password baru
+5. User input password baru → POST ke BE untuk update
+
 ## HEALT-TRACKING
 
 ## USER SCHEMA

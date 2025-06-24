@@ -41,7 +41,6 @@ async function verifyTokenAsync(req, res, next) {
     });
 
     req.auth = decoded;
-    console.log(req.auth);
 
     next();
   } catch (error) {

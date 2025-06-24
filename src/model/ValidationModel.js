@@ -41,4 +41,15 @@ const userLoginSchema = Joi.object({
   }),
 });
 
-export { userRegisterSchema, userLoginSchema };
+const updateUserSchema = Joi.object({
+  full_name: Joi.string().min(1),
+  username: Joi.string().alphanum().min(3).max(255),
+  age: Joi.number().integer().min(0),
+  gender: Joi.string().valid("pria", "wanita", "lainnya"),
+  height_cm: Joi.number().integer().min(0),
+  weight_kg: Joi.number().precision(2).min(0),
+  chronic_diseases: Joi.array().items(Joi.string()),
+  smoking_status: Joi.string().valid("aktif", "tidak aktif"),
+}).min(1); // Harus ada minimal 1 field
+
+export { userRegisterSchema, userLoginSchema, updateUserSchema };
