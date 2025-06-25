@@ -1,5 +1,6 @@
 import express from "express";
 import * as AuthService from "../service/UserService.js";
+import { verifyTokenAsync } from "../middleware/TokenAuthMiddleware.js";
 
 const router = express.Router();
 
@@ -26,6 +27,13 @@ router.post("/verify-reset-code", async (req, res) => {
 router.post("/update-password", async (req, res) => {
   const response = await AuthService.updatePassword(req);
   res.status(Number(response.statusCode)).json(response);
+});
+
+router.post("/update/profile", verifyTokenAsync, async (req, res) => {
+  const response = await AuthService.updateUserProfile(req);
+  res.status(Number(response.statusCode)).json(response);
+  // console.log(req.auth);
+  // res.json({ masuk: true });
 });
 
 export { router };

@@ -20,30 +20,31 @@ const userRegisterSchema = Joi.object({
     "any.required": "Nama lengkap wajib diisi",
   }),
 
-  username: Joi.string().min(3).max(30).required().messages({
+  username: Joi.string().min(4).max(30).required().messages({
     "string.empty": "Username tidak boleh kosong",
     "string.alphanum": "Username hanya boleh berisi huruf dan angka",
-    "string.min": "Username minimal 3 karakter",
+    "string.min": "Username minimal 4 karakter",
     "string.max": "Username maksimal 30 karakter",
     "any.required": "Username wajib diisi",
   }),
 });
 
 const userLoginSchema = Joi.object({
-  username: Joi.string().required().messages({
+  username: Joi.string().min(4).max(30).required().messages({
     "string.empty": "Username tidak boleh kosong",
+    "string.min": "Username minimal 4 karakter",
     "any.required": "Username wajib diisi",
+    "string.max": "Username maksimal 30 karakter",
   }),
 
-  password: Joi.string().required().messages({
+  password: Joi.string().required().min(4).messages({
     "string.empty": "Password tidak boleh kosong",
     "any.required": "Password wajib diisi",
+    "string.min": "Username minimal 4 karakter",
   }),
 });
 
 const updateUserSchema = Joi.object({
-  full_name: Joi.string().min(1),
-  username: Joi.string().alphanum().min(3).max(255),
   age: Joi.number().integer().min(0),
   gender: Joi.string().valid("pria", "wanita", "lainnya"),
   height_cm: Joi.number().integer().min(0),

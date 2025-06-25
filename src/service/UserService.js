@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import {
   userRegisterSchema,
   userLoginSchema,
+  updateUserSchema,
 } from "../model/ValidationModel.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
@@ -275,10 +276,50 @@ async function updatePassword(req) {
   }
 }
 
+async function updateUserProfile(req) {
+  const { updateFields } = req.body;
+  const { error, value } = updateUserSchema.validate(updateFields, {
+    abortEarly: false,
+    stripUnknown: true,
+  });
+
+  if (error) {
+    return new ErrorResponse({
+      status: "error",
+      message: "Validasi gagal",
+      error: error.details.map((e) => ({
+        field: e.path[0],
+        message: e.message,
+      })),
+      statusCode: 400,
+    });
+  }
+
+  console.log(req.auth.id);
+  try {
+    await Repo.updateUserDataField(req.auth.id, updateFields);
+
+    return new SuccessResponse({
+      status: "success",
+      message: "berhasil mengupdate fields",
+      data: updateFields,
+      statusCode: 200,
+    });
+  } catch (error) {
+    return new ErrorResponse({
+      status: "error",
+      message: "terjadi kesalahan saat mengganti password! operasi dibatalkan",
+      error: [error],
+      statusCode: 500,
+    });
+  }
+}
+
 export {
   registerNewUser,
   loginExistingUser,
   forgotPassword,
   verifyResetToken,
   updatePassword,
+  updateUserProfile,
 };

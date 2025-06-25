@@ -163,19 +163,49 @@ async function updatePassword(tempToken, hashNewPassword) {
   }
 }
 
-// async function dynamicDbColumnUpdate() {
-//   //field yg boleh diupdate
-//   const allowedFields = [
-//     "full_name",
-//     "username",
-//     "age",
-//     "gender",
-//     "height_cm",
-//     "weight_kg",
-//     "chronic_diseases",
-//     "smoking_status",
-//   ];
-// }
+async function updateUserDataField(id, fieldObject) {
+  const allowedFields = [
+    "age",
+    "gender",
+    "height_cm",
+    "weight_kg",
+    "chronic_diseases",
+    "smoking_status",
+  ];
+
+  const keys = Object.keys(fieldObject).filter((key) =>
+    allowedFields.includes(key)
+  );
+
+  if (keys.length === 0) {
+    throw new Error("Tidak ada field yang valid untuk diupdate");
+  }
+
+  const setClauses = keys.map((key, i) => `${key} = $${i + 1}`);
+  const values = keys.map((key) => {
+    let val = fieldObject[key];
+    if (key === "chronic_diseases") {
+      val = JSON.stringify(val);
+    }
+    return val;
+  });
+
+  const sql = `
+    UPDATE users
+    SET ${setClauses.join(", ")}
+    WHERE id = $${keys.length + 1}
+    RETURNING ${keys.join(", ")};
+  `;
+
+  try {
+    const result = await dbPool.query(sql, [...values, id]);
+
+    return result.rows[0];
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
 
 export {
   addUser,
@@ -184,4 +214,5 @@ export {
   findValidResetToken,
   setTempTokenPw,
   updatePassword,
+  updateUserDataField,
 };
