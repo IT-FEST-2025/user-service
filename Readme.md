@@ -142,6 +142,11 @@ request body :
 
 ## update data
 
+**Endpoint** : POST /api/update/profile
+User harus login dulu buat akses endpoint ini!
+
+Request Body :
+
 ```json
 {
   "updateFields": {

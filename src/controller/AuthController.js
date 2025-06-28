@@ -4,36 +4,47 @@ import { verifyTokenAsync } from "../middleware/TokenAuthMiddleware.js";
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
-  let response = await AuthService.registerNewUser(req);
-  res.status(Number(response.statusCode)).json(response);
-});
+const handleServiceResponse = async (serviceMethod, req, res) => {
+  try {
+    const response = await serviceMethod(req);
+    return res.status(response.statusCode).json(response);
+  } catch (error) {
+    console.error("Service error:", error);
+    return res.status(500).json({
+      statusCode: 500,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
 
-router.post("/login", async (req, res) => {
-  let response = await AuthService.loginExistingUser(req);
-  res.status(Number(response.statusCode)).json(response);
-});
+// Auth routes
+router.post("/register", (req, res) =>
+  handleServiceResponse(AuthService.registerNewUser, req, res)
+);
 
-router.post("/forgot-password", async (req, res) => {
-  const response = await AuthService.forgotPassword(req);
-  res.status(Number(response.statusCode)).json(response);
-});
+router.post("/login", (req, res) =>
+  handleServiceResponse(AuthService.loginExistingUser, req, res)
+);
 
-router.post("/verify-reset-code", async (req, res) => {
-  const response = await AuthService.verifyResetToken(req);
-  res.status(Number(response.statusCode)).json(response);
-});
+router.post("/forgot-password", (req, res) =>
+  handleServiceResponse(AuthService.forgotPassword, req, res)
+);
 
-router.post("/update-password", async (req, res) => {
-  const response = await AuthService.updatePassword(req);
-  res.status(Number(response.statusCode)).json(response);
-});
+router.post("/verify-reset-code", (req, res) =>
+  handleServiceResponse(AuthService.verifyResetToken, req, res)
+);
 
-router.post("/update/profile", verifyTokenAsync, async (req, res) => {
-  const response = await AuthService.updateUserProfile(req);
-  res.status(Number(response.statusCode)).json(response);
-  // console.log(req.auth);
-  // res.json({ masuk: true });
-});
+router.post("/update-password", (req, res) =>
+  handleServiceResponse(AuthService.updatePassword, req, res)
+);
+
+router.post("/update/profile", verifyTokenAsync, (req, res) =>
+  handleServiceResponse(AuthService.updateUserProfile, req, res)
+);
+
+router.get("/me", verifyTokenAsync, (req, res) =>
+  handleServiceResponse(AuthService.getMyData, req, res)
+);
 
 export { router };

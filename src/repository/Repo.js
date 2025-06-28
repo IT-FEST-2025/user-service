@@ -31,16 +31,10 @@ async function addUser(newUser) {
   }
 }
 
-async function getSimpleData(StringUsername) {
+async function getAllUserData(StringUsername) {
   //dipake buat login
   const sqlQuery = `
-  SELECT
-    id,
-    email,
-    password_hash,
-    full_name,
-    username,
-    created_at
+  SELECT *
   FROM users
   WHERE username = $1
 `;
@@ -209,7 +203,7 @@ async function updateUserDataField(id, fieldObject) {
 
 export {
   addUser,
-  getSimpleData,
+  getAllUserData,
   setResetToken,
   findValidResetToken,
   setTempTokenPw,

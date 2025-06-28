@@ -95,8 +95,8 @@ async function loginExistingUser(loginObjectBody) {
     });
   }
 
-  const userData = await Repo.getSimpleData(username);
-  // console.log(userData);
+  const userData = await Repo.getAllUserData(username);
+  console.log(userData);
 
   if (!userData) {
     return new ErrorResponse({
@@ -143,8 +143,7 @@ async function loginExistingUser(loginObjectBody) {
 async function forgotPassword(req) {
   const { username } = req.body;
 
-  const userData = await Repo.getSimpleData(username);
-  console.log(userData);
+  const userData = await Repo.getAllUserData(username);
 
   if (!userData) {
     return new ErrorResponse({
@@ -315,6 +314,49 @@ async function updateUserProfile(req) {
   }
 }
 
+async function getMyData(req) {
+  const username = req.auth.username;
+
+  try {
+    const userRawData = await Repo.getAllUserData(username);
+
+    if (!userRawData) {
+      return new ErrorResponse({
+        status: "bad request",
+        message: "akun tidak ditemukan!",
+        error: null,
+        statusCode: 400,
+      });
+    }
+
+    const responseData = {
+      email: userRawData.email,
+      username: userRawData.username,
+      fullName: userRawData.full_name,
+      age: userRawData.age,
+      gender: userRawData.gender,
+      height: userRawData.height_cm,
+      weight: userRawData.weight_kg,
+      chronicDiseases: userRawData.chronic_diseases,
+      smokingStatus: userRawData.smoking_status,
+    };
+    return new SuccessResponse({
+      status: "success",
+      message: "berhasil mengambil data user",
+      data: responseData,
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.log(error);
+    return new ErrorResponse({
+      status: "error",
+      message: "terjadi kesalahan saat mengganti password! operasi dibatalkan",
+      error: [error],
+      statusCode: 500,
+    });
+  }
+}
+
 export {
   registerNewUser,
   loginExistingUser,
@@ -322,4 +364,5 @@ export {
   verifyResetToken,
   updatePassword,
   updateUserProfile,
+  getMyData,
 };
