@@ -4,7 +4,7 @@ import * as TrackerRepo from "./../repository/TrackerRepo.js";
 async function getUserHealthData(req) {
   //nanti service ini bakal return data seminggu ke belakang sama analisis dan saran
   //buat kehidupan user!
-  const range = req.query.range || "7d";
+  const range = req.query.range;
   const userID = req.auth.id;
 
   try {
@@ -26,6 +26,64 @@ async function getUserHealthData(req) {
       message: "gagal mengambil data health records",
       error,
       statusCode: 500,
+    });
+  }
+}
+
+async function addHealthTrackData(req) {
+  if (!req.body) {
+    return new ErrorResponse({
+      status: "bad request",
+      message:
+        "data health tracker yang dikirimkan tidak valid! harap pastikan data sudah benar",
+      error: null,
+      statusCode: 400,
+    });
+  }
+  const user_id = req.auth.id;
+  const {
+    exercise_minutes,
+    exercise_type,
+    sleep_hours,
+    water_glasses,
+    junk_food_count,
+    overall_mood,
+    stress_level,
+    screen_time_hours,
+    blood_pressure,
+  } = req.body;
+
+  const record = {
+    user_id,
+    exercise_minutes,
+    exercise_type,
+    sleep_hours,
+    water_glasses,
+    junk_food_count,
+    overall_mood,
+    stress_level,
+    screen_time_hours,
+    blood_pressure,
+  };
+
+  try {
+    const response = await TrackerRepo.addHealthRecord(record);
+    return new SuccessResponse({
+      status: "success",
+      message: "berhasil menambah data health records",
+      data: {
+        response,
+        record,
+      },
+      statusCode: 200,
+    });
+  } catch (error) {
+    console.log(error);
+    return new ErrorResponse({
+      status: "error",
+      message: "gagal mengambil data health records",
+      error: error.message,
+      statusCode: 400,
     });
   }
 }
@@ -90,7 +148,7 @@ function calculateAverage(data, field) {
     return acc + (isNaN(value) ? 0 : value);
   }, 0);
 
-  return sum / validData.length;
+  return Math.round((sum / validData.length) * 100) / 100;
 }
 
 function analyzeTrends(data) {
@@ -99,7 +157,7 @@ function analyzeTrends(data) {
     (a, b) => new Date(a.record_date) - new Date(b.record_date)
   );
 
-  if (sortedData.length < 2) return {};
+  if (sortedData.length < 1) return {};
 
   const first = sortedData[0];
   const last = sortedData[sortedData.length - 1];
@@ -438,4 +496,4 @@ function generateSummary(averages, score) {
   )}/5). Diagnify Score Anda adalah ${Math.round(score)}/100.`;
 }
 
-export { getUserHealthData };
+export { getUserHealthData, addHealthTrackData };

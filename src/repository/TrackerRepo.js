@@ -26,4 +26,46 @@ async function getHealthRecords(userId, range = "7d") {
   }
 }
 
-export { getHealthRecords };
+async function addHealthRecord(recordObj) {
+  const sqlString = `
+    INSERT INTO health_records (
+      user_id,
+      exercise_minutes,
+      exercise_type,
+      sleep_hours,
+      water_glasses,
+      junk_food_count,
+      overall_mood,
+      stress_level,
+      screen_time_hours,
+      blood_pressure
+    ) VALUES (
+      $1, $2, $3, $4, $5,
+      $6, $7, $8, $9, $10
+    ) RETURNING *;
+  `;
+
+  const values = [
+    recordObj.user_id,
+    recordObj.exercise_minutes,
+    recordObj.exercise_type,
+    recordObj.sleep_hours,
+    recordObj.water_glasses,
+    recordObj.junk_food_count,
+    recordObj.overall_mood,
+    recordObj.stress_level,
+    recordObj.screen_time_hours,
+    recordObj.blood_pressure,
+  ];
+
+  try {
+    const result = await dbPool.query(sqlString, values);
+    console.log(result);
+    return result.rows[0];
+  } catch (err) {
+    console.error("Gagal insert record:", err.message);
+    throw err;
+  }
+}
+
+export { getHealthRecords, addHealthRecord };

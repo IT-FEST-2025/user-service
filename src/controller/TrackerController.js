@@ -13,4 +13,8 @@ router.get("/", verifyTokenAsync, (req, res) => {
   handleServiceResponse(TrackerService.getUserHealthData, req, res);
 });
 
+router.post("/", verifyTokenAsync, (req, res) => {
+  handleServiceResponse(TrackerService.addHealthTrackData, req, res);
+});
+
 export { router };
