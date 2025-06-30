@@ -1,10 +1,16 @@
 import express from "express";
 import { verifyTokenAsync } from "../middleware/TokenAuthMiddleware.js";
+import * as TrackerService from "./../service/TrackerService.js";
 
 const router = express.Router();
 
-router.get("/track", verifyTokenAsync, (req, res) => {
-  res.json(req.auth);
+const handleServiceResponse = async (serviceMethod, req, res) => {
+  const response = await serviceMethod(req);
+  return res.status(response.statusCode).json(response);
+};
+
+router.get("/", verifyTokenAsync, (req, res) => {
+  handleServiceResponse(TrackerService.getUserHealthData, req, res);
 });
 
 export { router };

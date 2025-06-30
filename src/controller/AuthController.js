@@ -5,17 +5,8 @@ import { verifyTokenAsync } from "../middleware/TokenAuthMiddleware.js";
 const router = express.Router();
 
 const handleServiceResponse = async (serviceMethod, req, res) => {
-  try {
-    const response = await serviceMethod(req);
-    return res.status(response.statusCode).json(response);
-  } catch (error) {
-    console.error("Service error:", error);
-    return res.status(500).json({
-      statusCode: 500,
-      message: "Internal server error",
-      error: error.message,
-    });
-  }
+  const response = await serviceMethod(req);
+  return res.status(response.statusCode).json(response);
 };
 
 // Auth routes

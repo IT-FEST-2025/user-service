@@ -1,7 +1,5 @@
 import { Pool } from "pg";
-import { dbConfig } from "../config/DatabaseConfig.js";
-
-const dbPool = new Pool(dbConfig);
+import { dbConfig, dbPool } from "../config/DatabaseConfig.js";
 
 async function addUser(newUser) {
   const sqlString = `
