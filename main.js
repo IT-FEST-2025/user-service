@@ -10,6 +10,8 @@ app.use(express.json());
 app.use("/api", AuthController.router);
 app.use("/tracker", TrackerController.router);
 
-app.listen(3000, () => {
-  console.log("app berjalan di port 3000");
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`app berjalan di port ${PORT}`);
 });
