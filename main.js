@@ -6,7 +6,7 @@ const app = express();
 
 //middleware
 app.use(cors({
-  origin: "https://ayuwoki.my.id"
+  origin: ["https://ayuwoki.my.id", "http://localhost:5173"],
 }))
 app.use(express.json());
 
