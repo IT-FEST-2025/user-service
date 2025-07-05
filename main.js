@@ -1,9 +1,13 @@
 import express from "express";
 import * as AuthController from "./src/controller/AuthController.js";
 import * as TrackerController from "./src/controller/TrackerController.js";
+import cors from "cors";
 const app = express();
 
 //middleware
+app.use(cors({
+  origin: "https://ayuwoki.my.id"
+}))
 app.use(express.json());
 
 //routing
