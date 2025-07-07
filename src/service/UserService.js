@@ -95,49 +95,56 @@ async function loginExistingUser(loginObjectBody) {
     });
   }
 
-  const userData = await Repo.getAllUserData(username);
-  console.log(userData);
-
-  if (!userData) {
-    return new ErrorResponse({
-      status: "bad request",
-      message: "akun tidak ditemukan!",
-      error: null,
-      statusCode: 400,
-    });
-  }
-
-  const isMatch = await bcrypt.compare(password, userData.password_hash);
-
-  if (!isMatch) {
-    return new ErrorResponse({
-      status: "bad request",
-      message: "password salah",
-      error: null,
-      statusCode: 401,
-    });
-  }
-
-  const token = jwt.sign(
-    {
-      id: userData.id,
-      username: userData.username,
-      timeStamp: Date.now(),
-    },
-    jwtSecret,
-    {
-      expiresIn: "72h",
+  try {
+    const userData = await Repo.getAllUserData(username);
+    if (!userData) {
+      return new ErrorResponse({
+        status: "bad request",
+        message: "akun tidak ditemukan!",
+        error: null,
+        statusCode: 400,
+      });
     }
-  );
 
-  return new SuccessResponse({
-    status: "success",
-    message: "berhasil login",
-    data: {
-      accessToken: token,
-    },
-    statusCode: 200,
-  });
+    const isMatch = await bcrypt.compare(password, userData.password_hash);
+
+    if (!isMatch) {
+      return new ErrorResponse({
+        status: "bad request",
+        message: "password salah",
+        error: null,
+        statusCode: 401,
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: userData.id,
+        username: userData.username,
+        timeStamp: Date.now(),
+      },
+      jwtSecret,
+      {
+        expiresIn: "72h",
+      }
+    );
+
+    return new SuccessResponse({
+      status: "success",
+      message: "berhasil login",
+      data: {
+        accessToken: token,
+      },
+      statusCode: 200,
+    });
+  } catch (error) {
+    return new ErrorResponse({
+      status: "internal server error",
+      message: "Terdapat critical error pada server, harap hubungi developper",
+      error: error.message,
+      statusCode: 500,
+    });
+  }
 }
 
 async function forgotPassword(req) {
