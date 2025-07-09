@@ -12,6 +12,9 @@ import dotenv from "dotenv";
 dotenv.config();
 import { transporter } from "../model/EmailTransporterModel.js";
 import crypto from "crypto";
+import { uploadDir } from "../model/MulterModel.js";
+import path from "path";
+import fs from "fs";
 
 //global var
 const jwtSecret = process.env.JWT_SECRET;
@@ -346,6 +349,7 @@ async function getMyData(req) {
       weight: userRawData.weight_kg,
       chronicDiseases: userRawData.chronic_diseases,
       smokingStatus: userRawData.smoking_status,
+      profilePicture: userRawData.profilepicture,
     };
     return new SuccessResponse({
       status: "success",
@@ -364,6 +368,56 @@ async function getMyData(req) {
   }
 }
 
+async function uploadImageProfile(req) {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return new ErrorResponse({
+        status: "error",
+        message: "File gambar tidak ditemukan! harap masukan file dengan benar",
+        error: null,
+        statusCode: 400,
+      });
+    }
+
+    try {
+      await deleteExistingImageFile(req.auth.username);
+      await Repo.setImageProfile(req.file.filename, req.auth.id);
+      return new SuccessResponse({
+        status: "success",
+        message: "berhasil mengupdate foto profile",
+        data: req.file.filename,
+        statusCode: 201,
+      });
+    } catch (error) {
+      return new ErrorResponse({
+        status: "Internal server error",
+        message: "kesalahan di database! gagal menyimpan gambar",
+        error: error.message,
+        statusCode: 500,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function deleteExistingImageFile(username) {
+  const rawUserData = await Repo.getAllUserData(username);
+  const OldImageFileName = rawUserData.profilepicture;
+
+  // 2. Hapus file lama jika ada
+  if (OldImageFileName) {
+    const oldPath = path.join(uploadDir, OldImageFileName);
+    fs.unlink(oldPath, (err) => {
+      if (err) {
+        console.warn("Gagal menghapus foto lama:", err.message);
+      }
+    });
+  }
+}
+
 export {
   registerNewUser,
   loginExistingUser,
@@ -372,4 +426,5 @@ export {
   updatePassword,
   updateUserProfile,
   getMyData,
+  uploadImageProfile,
 };

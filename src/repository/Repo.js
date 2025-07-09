@@ -199,6 +199,25 @@ async function updateUserDataField(id, fieldObject) {
   }
 }
 
+async function setImageProfile(filename, userId) {
+  const query = `
+  UPDATE users
+  SET profilepicture = $1
+  WHERE id = $2
+  RETURNING profilepicture;
+`;
+
+  const values = [filename, userId];
+
+  try {
+    const result = await dbPool.query(query, values);
+    return result.rows[0]; // atau .rowCount untuk jumlah row yang kena
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    throw err;
+  }
+}
+
 export {
   addUser,
   getAllUserData,
@@ -207,4 +226,5 @@ export {
   setTempTokenPw,
   updatePassword,
   updateUserDataField,
+  setImageProfile,
 };

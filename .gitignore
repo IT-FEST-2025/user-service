@@ -67,3 +67,5 @@ out/
 
 # Prisma (kalau pakai)
 .prisma/
+
+uploads/

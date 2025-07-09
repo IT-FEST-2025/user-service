@@ -1,6 +1,7 @@
 import express from "express";
 import * as AuthService from "../service/UserService.js";
 import { verifyTokenAsync } from "../middleware/TokenAuthMiddleware.js";
+import upload from "./../model/MulterModel.js";
 
 const router = express.Router();
 
@@ -36,6 +37,15 @@ router.post("/update/profile", verifyTokenAsync, (req, res) =>
 
 router.get("/me", verifyTokenAsync, (req, res) =>
   handleServiceResponse(AuthService.getMyData, req, res)
+);
+
+router.post(
+  "/photoprofile",
+  verifyTokenAsync,
+  upload.single("image"),
+  (req, res) => {
+    handleServiceResponse(AuthService.uploadImageProfile, req, res);
+  }
 );
 
 export { router };
