@@ -5,7 +5,6 @@ import { uploadDir } from "./src/model/MulterModel.js";
 import cors from "cors";
 const app = express();
 
-middleware;
 app.use(
   cors({
     origin: ["https://ayuwoki.my.id", "http://localhost:5173"],
