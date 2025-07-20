@@ -48,4 +48,8 @@ router.post(
   }
 );
 
+router.delete("/photoprofile", verifyTokenAsync, (req, res) => {
+  handleServiceResponse(AuthService.deleteEndPoint, req, res);
+});
+
 export { router };

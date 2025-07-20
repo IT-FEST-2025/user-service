@@ -413,6 +413,21 @@ async function uploadImageProfile(req) {
   }
 }
 
+async function deleteEndPoint(req) {
+  try {
+    await deleteExistingImageFile(req.auth.username);
+    return new SuccessResponse({
+      statusCode: 204,
+    });
+  } catch (error) {
+    return new ErrorResponse({
+      status: "internal server error",
+      message: "kesalahan saat menghapus gambar",
+      error: error.message,
+      statusCode: 500,
+    });
+  }
+}
 async function deleteExistingImageFile(username) {
   const rawUserData = await Repo.getAllUserData(username);
   const OldImageFileName = rawUserData.profilepicture;
@@ -436,5 +451,6 @@ export {
   updatePassword,
   updateUserProfile,
   getMyData,
+  deleteEndPoint,
   uploadImageProfile,
 };
