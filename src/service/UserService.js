@@ -15,6 +15,7 @@ import crypto from "crypto";
 import { uploadDir } from "../model/MulterModel.js";
 import path from "path";
 import fs from "fs";
+import { ifError } from "assert";
 
 //global var
 const jwtSecret = process.env.JWT_SECRET;
@@ -304,6 +305,15 @@ async function updateUserProfile(req) {
     });
   }
 
+  if (!updateFields) {
+    return new ErrorResponse({
+      status: "error",
+      message: "HARAP PERIKSA FORMAT JSON SEBELUM MENGIRIM PERUBAHAN DATA!",
+      error: null,
+      statusCode: 400,
+    });
+  }
+
   console.log(req.auth.id);
   try {
     await Repo.updateUserDataField(req.auth.id, updateFields);
@@ -318,8 +328,8 @@ async function updateUserProfile(req) {
     return new ErrorResponse({
       status: "error",
       message: "terjadi kesalahan saat mengganti password! operasi dibatalkan",
-      error: [error],
-      statusCode: 500,
+      error: error.message,
+      statusCode: 400,
     });
   }
 }

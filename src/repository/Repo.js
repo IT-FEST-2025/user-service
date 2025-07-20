@@ -156,6 +156,11 @@ async function updatePassword(tempToken, hashNewPassword) {
 }
 
 async function updateUserDataField(id, fieldObject) {
+  // Validasi ID
+  if (!id || !Number.isInteger(Number(id))) {
+    throw new Error("ID harus berupa angka yang valid");
+  }
+
   const allowedFields = [
     "age",
     "gender",
@@ -163,7 +168,13 @@ async function updateUserDataField(id, fieldObject) {
     "weight_kg",
     "chronic_diseases",
     "smoking_status",
+    "full_name",
   ];
+
+  // Validasi fieldObject
+  if (!fieldObject || typeof fieldObject !== "object") {
+    throw new Error("Field object harus berupa object yang valid");
+  }
 
   const keys = Object.keys(fieldObject).filter((key) =>
     allowedFields.includes(key)
@@ -173,11 +184,41 @@ async function updateUserDataField(id, fieldObject) {
     throw new Error("Tidak ada field yang valid untuk diupdate");
   }
 
+  // Validasi nilai untuk setiap field
+  const validateField = (key, value) => {
+    switch (key) {
+      case "age":
+        if (!Number.isInteger(value) || value < 0 || value > 150) {
+          throw new Error("Age harus berupa integer antara 0-150");
+        }
+        break;
+      case "height_cm":
+      case "weight_kg":
+        if (typeof value !== "number" || value <= 0) {
+          throw new Error(`${key} harus berupa angka positif`);
+        }
+        break;
+      case "chronic_diseases":
+        if (value !== null && typeof value !== "object") {
+          throw new Error("chronic_diseases harus berupa object atau null");
+        }
+        break;
+    }
+  };
+
   const setClauses = keys.map((key, i) => `${key} = $${i + 1}`);
   const values = keys.map((key) => {
-    let val = fieldObject[key];
+    const val = fieldObject[key];
+
+    // Validasi nilai
+    validateField(key, val);
+
     if (key === "chronic_diseases") {
-      val = JSON.stringify(val);
+      try {
+        return val ? JSON.stringify(val) : null;
+      } catch (error) {
+        throw new Error("Gagal mengkonversi chronic_diseases ke JSON");
+      }
     }
     return val;
   });
@@ -192,9 +233,19 @@ async function updateUserDataField(id, fieldObject) {
   try {
     const result = await dbPool.query(sql, [...values, id]);
 
+    if (result.rows.length === 0) {
+      throw new Error("User dengan ID tersebut tidak ditemukan");
+    }
+
     return result.rows[0];
   } catch (error) {
-    console.log(error);
+    console.error("Database error:", error);
+
+    // Re-throw dengan pesan yang lebih user-friendly jika perlu
+    if (error.message.includes("invalid input syntax")) {
+      throw new Error("Format data tidak valid");
+    }
+
     throw error;
   }
 }
