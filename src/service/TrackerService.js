@@ -290,11 +290,11 @@ function calculateDiagnifyScore(averages) {
 }
 
 function getScoreCategory(score) {
-  if (score >= 85) return "Excellent";
-  if (score >= 70) return "Good";
-  if (score >= 55) return "Fair";
-  if (score >= 40) return "Poor";
-  return "Critical";
+  if (score >= 85) return "Sangat Baik";
+  if (score >= 70) return "Baik";
+  if (score >= 55) return "Kurang";
+  if (score >= 40) return "Buruk";
+  return "Sangat Buruk";
 }
 
 function categorizeHealth(averages) {
