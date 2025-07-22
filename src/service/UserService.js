@@ -418,7 +418,8 @@ async function deleteEndPoint(req) {
     await deleteExistingImageFile(req.auth.username);
     await Repo.deleteImageFunc(req.auth.id);
     return new SuccessResponse({
-      statusCode: 204,
+      status: "success",
+      statusCode: 200,
     });
   } catch (error) {
     return new ErrorResponse({
