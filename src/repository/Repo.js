@@ -186,6 +186,7 @@ async function updateUserDataField(id, fieldObject) {
 
   // Validasi nilai untuk setiap field
   const validateField = (key, value) => {
+    if (value === null) return;
     switch (key) {
       case "age":
         if (!Number.isInteger(value) || value < 0 || value > 150) {
@@ -199,7 +200,7 @@ async function updateUserDataField(id, fieldObject) {
         }
         break;
       case "chronic_diseases":
-        if (value !== null && typeof value !== "object") {
+        if (typeof value !== "object") {
           throw new Error("chronic_diseases harus berupa object atau null");
         }
         break;
