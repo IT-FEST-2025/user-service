@@ -269,6 +269,20 @@ async function setImageProfile(filename, userId) {
   }
 }
 
+async function deleteImageFunc(userId) {
+  let query = `update users
+set profilepicture = null
+where id = $1;`;
+
+  const values = [userId];
+  try {
+    let result = await dbPool.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 export {
   addUser,
   getAllUserData,
@@ -278,4 +292,5 @@ export {
   updatePassword,
   updateUserDataField,
   setImageProfile,
+  deleteImageFunc,
 };

@@ -416,6 +416,7 @@ async function uploadImageProfile(req) {
 async function deleteEndPoint(req) {
   try {
     await deleteExistingImageFile(req.auth.username);
+    await Repo.deleteImageFunc(req.auth.id);
     return new SuccessResponse({
       statusCode: 204,
     });
@@ -432,7 +433,6 @@ async function deleteExistingImageFile(username) {
   const rawUserData = await Repo.getAllUserData(username);
   const OldImageFileName = rawUserData.profilepicture;
 
-  // 2. Hapus file lama jika ada
   if (OldImageFileName) {
     const oldPath = path.join(uploadDir, OldImageFileName);
     fs.unlink(oldPath, (err) => {
