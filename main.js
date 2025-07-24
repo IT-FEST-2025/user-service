@@ -7,7 +7,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["https://ayuwoki.my.id", "http://localhost:5173"],
+    origin: ["https://www.diagnify.site", "https://diagnify.site", "https://ayuwoki.my.id", "http://localhost:5173"],
   })
 );
 app.use(express.json());
