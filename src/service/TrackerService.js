@@ -12,22 +12,46 @@ async function getUserHealthData(req) {
 
     const trendAnalyze = analyzeHealthData(healthData);
 
+    const dailyScore = countEveryDiagnifyScore(healthData);
+
     return new SuccessResponse({
       status: "success",
       message: "berhasil mengambil data health records",
       data: {
         analysis: trendAnalyze,
+        rawData: healthData,
+        dailyDiagnifyScore: dailyScore,
       },
       statusCode: 200,
     });
   } catch (error) {
     return new ErrorResponse({
       status: "error",
-      message: "gagal mengambil data health records",
+      message: "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
       error,
       statusCode: 500,
     });
   }
+}
+
+function countEveryDiagnifyScore(records) {
+  return records.map((record) => {
+    const input = {
+      exerciseMinutes: record.exercise_minutes,
+      sleepHours: record.sleep_hours,
+      waterGlasses: record.water_glasses,
+      junkFoodCount: record.junk_food_count,
+      overallMood: record.overall_mood,
+      stressLevel: record.stress_level,
+      screenTimeHours: record.screen_time_hours,
+      bloodPressure: record.blood_pressure,
+    };
+
+    return {
+      record_date: record.record_date,
+      diagnifyScore: calculateDiagnifyScore(input),
+    };
+  });
 }
 
 async function addHealthTrackData(req) {
@@ -81,7 +105,7 @@ async function addHealthTrackData(req) {
     console.log(error);
     return new ErrorResponse({
       status: "error",
-      message: "gagal mengambil data health records",
+      message: "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
       error: error.message,
       statusCode: 400,
     });
@@ -127,7 +151,7 @@ function analyzeHealthData(healthRecords) {
 
   return {
     period: `${weeklyData.length} hari terakhir`,
-    diagnifyScore: Math.round(diagnifyScore),
+    diagnifyScore: Math.round(diagnifyScore), //perminggu
     scoreCategory: getScoreCategory(diagnifyScore),
     analysis,
     healthCategories,
@@ -276,14 +300,16 @@ function calculateDiagnifyScore(averages) {
   maxScore += 10;
   if (averages.bloodPressure <= 120) {
     score += 10;
-  } else if (averages.bloodPressure <= 130) {
-    score += 8;
-  } else if (averages.bloodPressure <= 140) {
-    score += 6;
-  } else if (averages.bloodPressure <= 160) {
+  } else if (averages.bloodPressure < 90) {
+    score += 7;
+  } else if (50 <= averages.bloodPressure < 80) {
+    score += 4;
+  } else if (averages.bloodPressure < 130) {
+    score += 7;
+  } else if (averages.bloodPressure < 180) {
     score += 4;
   } else {
-    score += 2;
+    score += 1;
   }
 
   return (score / maxScore) * 100;
