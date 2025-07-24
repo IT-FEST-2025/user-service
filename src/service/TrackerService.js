@@ -12,11 +12,15 @@ async function getUserHealthData(req) {
 
     const trendAnalyze = analyzeHealthData(healthData);
 
+    const dailyScore = countEveryDiagnifyScore(healthData);
+
     return new SuccessResponse({
       status: "success",
       message: "berhasil mengambil data health records",
       data: {
         analysis: trendAnalyze,
+        rawData: healthData,
+        dailyDiagnifyScore: dailyScore,
       },
       statusCode: 200,
     });
@@ -28,6 +32,26 @@ async function getUserHealthData(req) {
       statusCode: 500,
     });
   }
+}
+
+function countEveryDiagnifyScore(records) {
+  return records.map((record) => {
+    const input = {
+      exerciseMinutes: record.exercise_minutes,
+      sleepHours: record.sleep_hours,
+      waterGlasses: record.water_glasses,
+      junkFoodCount: record.junk_food_count,
+      overallMood: record.overall_mood,
+      stressLevel: record.stress_level,
+      screenTimeHours: record.screen_time_hours,
+      bloodPressure: record.blood_pressure,
+    };
+
+    return {
+      record_date: record.record_date,
+      diagnifyScore: calculateDiagnifyScore(input),
+    };
+  });
 }
 
 async function addHealthTrackData(req) {
@@ -127,7 +151,7 @@ function analyzeHealthData(healthRecords) {
 
   return {
     period: `${weeklyData.length} hari terakhir`,
-    diagnifyScore: Math.round(diagnifyScore),
+    diagnifyScore: Math.round(diagnifyScore), //perminggu
     scoreCategory: getScoreCategory(diagnifyScore),
     analysis,
     healthCategories,
