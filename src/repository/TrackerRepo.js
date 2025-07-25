@@ -67,11 +67,10 @@ async function addHealthRecord(recordObj) {
     // console.log("Error message:", err.message);
     // console.log("Full error:", err);
     if (err.code === "23514") {
-      const customErr = new Error(
-        "Data yang kamu masukkan tidak sesuai ketentuan! Harap masukkan data secara sesuai dan masuk akal! "
-      );
+      const customErr = new Error("gagal saat menulis data ke db!");
 
-      customErr.reason = "GAGAL SAAT MENULIS DATA KE DB!";
+      customErr.reason =
+        "Data yang kamu masukkan tidak sesuai ketentuan! Harap masukkan data secara sesuai dan masuk akal!";
       throw customErr;
     }
     console.error("Gagal insert record:", err.message);
