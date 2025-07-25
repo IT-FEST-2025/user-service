@@ -10,9 +10,8 @@ async function getUserHealthData(req) {
   try {
     const healthData = await TrackerRepo.getHealthRecords(userID, range);
 
-    const trendAnalyze = analyzeHealthData(healthData);
-
     const dailyScore = countEveryDiagnifyScore(healthData);
+    const trendAnalyze = analyzeHealthData(healthData, dailyScore);
 
     return new SuccessResponse({
       status: "success",
@@ -27,7 +26,8 @@ async function getUserHealthData(req) {
   } catch (error) {
     return new ErrorResponse({
       status: "error",
-      message: "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
+      message:
+        "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
       error,
       statusCode: 500,
     });
@@ -105,14 +105,25 @@ async function addHealthTrackData(req) {
     console.log(error);
     return new ErrorResponse({
       status: "error",
-      message: "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
+      message:
+        "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
       error: error.message,
       statusCode: 400,
     });
   }
 }
 
-function analyzeHealthData(healthRecords) {
+//ini tambahan terbaru. gua mau ubah yang lain ngeri error jirlah
+function calculateAverageDiagnifyScore(data) {
+  const scores = data.map((item) => item.diagnifyScore);
+
+  const total = scores.reduce((sum, score) => sum + score, 0);
+  const average = scores.length ? total / scores.length : 0;
+
+  return average;
+}
+
+function analyzeHealthData(healthRecords, everyDiagnifySCore) {
   if (healthRecords.length === 0) {
     return {
       error: "Tidak ada data untuk dianalisis",
@@ -141,7 +152,8 @@ function analyzeHealthData(healthRecords) {
   };
 
   // Hitung Diagnify Score (0-100)
-  const diagnifyScore = calculateDiagnifyScore(analysis.averages);
+  const diagnifyScore = calculateAverageDiagnifyScore(everyDiagnifySCore);
+  // console.log(diagnifyScore);
 
   // Generate recommendations
   const recommendations = generateRecommendations(analysis.averages);
