@@ -63,6 +63,17 @@ async function addHealthRecord(recordObj) {
     console.log(result);
     return result.rows[0];
   } catch (err) {
+    // console.log("Error code:", err.code);
+    // console.log("Error message:", err.message);
+    // console.log("Full error:", err);
+    if (err.code === "23514") {
+      const customErr = new Error(
+        "Data yang kamu masukkan tidak sesuai ketentuan! Harap masukkan data secara sesuai dan masuk akal! "
+      );
+
+      customErr.reason = "GAGAL SAAT MENULIS DATA KE DB!";
+      throw customErr;
+    }
     console.error("Gagal insert record:", err.message);
     throw err;
   }

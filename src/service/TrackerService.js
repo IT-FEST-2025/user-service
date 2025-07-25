@@ -27,8 +27,8 @@ async function getUserHealthData(req) {
     return new ErrorResponse({
       status: "error",
       message:
-        "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
-      error,
+        "Gagal mengambil data di record. Terjadi sebuah error mohon maaf",
+      error: error.message,
       statusCode: 500,
     });
   }
@@ -106,6 +106,7 @@ async function addHealthTrackData(req) {
     return new ErrorResponse({
       status: "error",
       message:
+        error.reason ||
         "Anda sudah mengisi Health Track hari ini. Silakan coba lagi besok.",
       error: error.message,
       statusCode: 400,
